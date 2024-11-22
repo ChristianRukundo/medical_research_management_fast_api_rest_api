@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+passlib
+bcrypt
+python-jose
+python-multipart
+environs==9.4.0
+psycopg2
