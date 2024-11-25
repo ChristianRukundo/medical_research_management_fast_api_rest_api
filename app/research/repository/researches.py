@@ -1,46 +1,45 @@
 from fastapi import Response, status, HTTPException
+from sqlalchemy.orm import Session
 
 from ..models.research import Research
+from ..schemas.researches import ResearchCreate, ResearchUpdate
 
 
-def get_all(db):
-    researches = db.query(Research).all()
-    return researches
+def get_all(db: Session):
+    return db.query(Research).all()
 
 
-def get_research_or_404(db, id: int):
-    research = db.query(Research).filter(Research.id == id)
-    if not research.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Research with the id {id} is not available")
+def get_research_or_404(db: Session, id: int):
+    research = db.query(Research).filter(Research.id == id).first()
+    if not research:
+        raise HTTPException(status_code=404, detail=f"Research with id {id} not found")
     return research
 
 
-def create(request, db, user):
-    new_research = Research(title=request.title, body=request.body, creator_id=user.id)
+def create(request: ResearchCreate, db: Session, user):
+    new_research = Research(
+        title=request.title,
+        body=request.body,
+        creator_id=user.id
+    )
     db.add(new_research)
     db.commit()
     db.refresh(new_research)
     return new_research
 
 
-def update(request, db, research):
-    research.update(request.dict(), synchronize_session=False)
+def update(request: ResearchUpdate, db: Session, research: Research):
+    research.title = request.title
+    research.body = request.body
     db.commit()
-    return {
-        "detail": "Successfully updated"
-    }
+    db.refresh(research)
+    return research
 
 
-def delete(db, research):
-    research.delete(synchronize_session=False)
+def delete(db: Session, research: Research):
+    db.delete(research)
     db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def is_creator(research, user):
-    if research.first().creator_id != user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"You don't have permission to edit research with the id {id}")
-    return True
-
+def is_creator(research: Research, user):
+    return research.creator_id == user.id
