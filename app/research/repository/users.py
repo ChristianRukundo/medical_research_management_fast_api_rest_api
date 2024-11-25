@@ -1,7 +1,9 @@
 from fastapi import status, HTTPException
+from sqlalchemy.orm import Session
 
 from .. import hashing
 from ..models.users import User
+from ..schemas.users import UserSchema
 
 
 def create(db, request):
@@ -31,3 +33,17 @@ def get_user_by_email(db, email: str):
             return user
 
     return None
+
+
+def update_user(db: Session, user: User, request: UserSchema):
+    user.name = request.name
+    user.email = request.email
+    user.password = hashing.get_password_hash(request.password)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def delete_user(db: Session, user: User):
+    db.delete(user)
+    db.commit()
