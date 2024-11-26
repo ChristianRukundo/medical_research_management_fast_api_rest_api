@@ -6,7 +6,7 @@ from ..models.research import Research
 from ..repository import researches
 from ..database import get_db
 from ..models.users import User
-from ..schemas.researches import ResearchCreate, ResearchUpdate, ResearchResponse
+from ..schemas.researches import ResearchCreate, ResearchUpdate, ResearchResponse, ResearchCreateList
 
 router = APIRouter(
     prefix="/researches",
@@ -57,6 +57,24 @@ def update_research(
         raise HTTPException(status_code=403, detail="You are not authorized to update this research")
 
     return researches.update(request, db, research)
+
+
+@router.post('/create_many', status_code=status.HTTP_201_CREATED, response_model=List[ResearchResponse])
+def create_multiple_researches(
+        request: ResearchCreateList,
+        user_id: int,
+        db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    created_researches = []
+    for research_data in request.researches:
+        research = researches.create(research_data, db, user)
+        created_researches.append(research)
+
+    return created_researches
 
 
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)

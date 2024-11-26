@@ -2,7 +2,7 @@ from fastapi import Response, status, HTTPException
 from sqlalchemy.orm import Session
 
 from ..models.research import Research
-from ..schemas.researches import ResearchCreate, ResearchUpdate
+from ..schemas.researches import ResearchCreate, ResearchUpdate, ResearchCreateList
 
 
 def get_all(db: Session):
@@ -39,6 +39,21 @@ def update(request: ResearchUpdate, db: Session, research: Research):
 def delete(db: Session, research: Research):
     db.delete(research)
     db.commit()
+
+
+def create_multiple(request: ResearchCreateList, db: Session, user):
+    created_researches = []
+    for research_data in request.researches:
+        new_research = Research(
+            title=research_data.title,
+            body=research_data.body,
+            creator_id=user.id
+        )
+        db.add(new_research)
+        db.commit()
+        db.refresh(new_research)
+        created_researches.append(new_research)
+    return created_researches
 
 
 def is_creator(research: Research, user):

@@ -47,3 +47,7 @@ def update_user(db: Session, user: User, request: UserSchema):
 def delete_user(db: Session, user: User):
     db.delete(user)
     db.commit()
+
+
+def get_all(db: Session):
+    return db.query(User).all()

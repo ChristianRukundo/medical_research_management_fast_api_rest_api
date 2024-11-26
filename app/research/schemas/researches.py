@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -12,6 +14,10 @@ class ResearchCreate(ResearchBase):
 
 class ResearchUpdate(ResearchBase):
     pass
+
+
+class ResearchCreateList(BaseModel):
+    researches: List[ResearchCreate]
 
 
 class ResearchResponse(BaseModel):

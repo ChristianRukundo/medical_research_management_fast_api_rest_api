@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -9,6 +11,11 @@ router = APIRouter(
     prefix="/users",
     tags=["user"],
 )
+
+
+@router.get("/", response_model=List[UserInfoSchema])
+def get_all_users(db: Session = Depends(database.get_db)):
+    return users.get_all(db)
 
 
 @router.post('/create', response_model=UserInfoSchema)
