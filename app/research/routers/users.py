@@ -1,9 +1,10 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.params import Query
 from sqlalchemy.orm import Session
 
-from .. import database
+from ..config import database
 from ..repository import users
 from ..schemas.users import UserSchema, UserInfoSchema, ShortUserInfoSchema
 
@@ -13,9 +14,27 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[UserInfoSchema])
+@router.get('/get_all', response_model=List[UserInfoSchema])
 def get_all_users(db: Session = Depends(database.get_db)):
+    """
+    Get all users without pagination.
+    """
     return users.get_all(db)
+
+
+@router.get("/", response_model=List[UserInfoSchema])
+def get_all_users(
+        db: Session = Depends(database.get_db),
+        limit: int = Query(100, ge=1, le=50000),
+        offset: int = Query(0, ge=0)
+):
+    """
+    Get all users with pagination.
+    :param db:
+    :param limit: Number of records to fetch (default: 100, max: 1000).
+    :param offset: Offset for the starting record (default: 0).
+    """
+    return users.get_all_paginated(db, limit=limit, offset=offset)
 
 
 @router.post('/create', response_model=UserInfoSchema)

@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException
 from sqlalchemy.orm import Session
 
-from .. import hashing
+from ..config import hashing
 from ..models.users import User
 from ..schemas.users import UserSchema
 
@@ -35,6 +35,10 @@ def get_user_by_email(db, email: str):
     return None
 
 
+def get_all_paginated(db: Session, limit: int, offset: int):
+    return db.query(User).offset(offset).limit(limit).all()
+
+
 def update_user(db: Session, user: User, request: UserSchema):
     user.name = request.name
     user.email = request.email
@@ -51,3 +55,4 @@ def delete_user(db: Session, user: User):
 
 def get_all(db: Session):
     return db.query(User).all()
+

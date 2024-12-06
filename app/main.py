@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 
-from research.database import engine, Base
+from research.config.database import engine, Base
 from research.routers import researches, users
 
 app = FastAPI(title="Research API")

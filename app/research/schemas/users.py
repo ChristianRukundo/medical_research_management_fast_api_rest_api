@@ -26,6 +26,7 @@ class ShortResearchInfoSchema(BaseModel):
 
 class UserInfoSchema(BaseModel):
     name: str
+    id: int
     email: str
     researches: List[ShortResearchInfoSchema] = []  # List of researches associated with the user
 
